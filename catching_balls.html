@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Falling Objects</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: url('sea.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            transition: background 0.5s ease-in-out;
+        }
+        .bubble {
+        position: absolute;
+        bottom: -50px; /* Start below the screen */
+        width: 20px;
+        height: 20px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        opacity: 0.7;
+        animation: rise 5s linear infinite;
+    }
+
+    @keyframes rise {
+        0% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-100vh);
+            opacity: 0;
+        }
+    }
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        #gameTitle {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        .basket {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            width: 100px;
+            height: 60px;
+            background: brown;
+            border-radius: 10px;
+            transform: translateX(-50%);
+            background-size: cover;
+        }
+        .object {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: red;
+            border-radius: 50%;
+        }
+        #score, #timer, #missed {
+            position: absolute;
+            top: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        #score { left: 10px; }
+        #timer { right: 10px; }
+        #missed { right: 150px; }
+        #gameOver {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 40px;
+            font-weight: bold;
+            color: red;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        /* Updated buttons position */
+        .buttons-container {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        button {
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            background: linear-gradient(45deg, #ff7e5f, #feb47b);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            width: 150px;
+        }
+        button:hover {
+            background: linear-gradient(45deg, #feb47b, #ff7e5f);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="gameTitle">Basket Rush</div>
+    <div id="gameContainer">
+        <div id="score">Score: 0</div>
+        <div id="timer">Time: 60</div>
+        <div id="missed">Missed: 0</div>
+        <div class="basket" id="basket"></div>
+        <div id="gameOver">Game Over! Refresh to Restart</div>
+    </div>
+
+    <div class="buttons-container">
+        <button onclick="setTheme('sea')">🌊 Sea Theme</button>
+        <button onclick="setTheme('space')">🚀 Space Theme</button>
+        <button onclick="setTheme('nebula')">✨ Nebula Theme</button>
+        <button onclick="setTheme('default')">🎮 Default Theme</button>
+        <hr>
+        <button onclick="changePlate('plate1')">🍽 Plate 1</button>
+        <button onclick="changePlate('plate2')">🍽 Plate 2</button>
+        <button onclick="changePlate('plate3')">🍽 Plate 3</button>
+    </div>
+
+    <script>
+        const basket = document.getElementById("basket");
+        let score = 0;
+        let missed = 0;
+        let gameOver = false;
+        let timeLeft = 60;
+
+        document.addEventListener("mousemove", (event) => {
+            if (!gameOver) {
+                let x = event.clientX;
+                basket.style.left = x + "px";
+            }
+        });
+
+        function createObject() {
+            if (gameOver) return;
+            const object = document.createElement("div");
+            object.classList.add("object");
+            object.style.left = Math.random() * window.innerWidth + "px";
+            object.style.top = "0px";
+            document.getElementById("gameContainer").appendChild(object);
+
+            let fallInterval = setInterval(() => {
+                if (gameOver) {
+                    clearInterval(fallInterval);
+                    return;
+                }
+                object.style.top = object.offsetTop + 5 + "px";
+
+                const basketLeft = basket.offsetLeft;
+                const basketRight = basketLeft + 100;
+                const objectLeft = object.offsetLeft;
+                const objectRight = objectLeft + 30;
+
+                if (object.offsetTop > window.innerHeight - 70) {
+                    if (objectRight > basketLeft && objectLeft < basketRight) {
+                        score++;
+                        document.getElementById("score").innerText = "Score: " + score;
+                    } else {
+                        missed++;
+                        document.getElementById("missed").innerText = "Missed: " + missed;
+                        if (missed >= 3) {
+                            endGame();
+                        }
+                    }
+                    document.getElementById("gameContainer").removeChild(object);
+                    clearInterval(fallInterval);
+                }
+            }, 30);
+        }
+
+        function startTimer() {
+            let timerInterval = setInterval(() => {
+                if (gameOver) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+                timeLeft--;
+                document.getElementById("timer").innerText = "Time: " + timeLeft;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            document.getElementById("gameOver").style.display = "block";
+            gameOver = true;
+        }
+
+        setInterval(createObject, 1000);
+        startTimer();
+
+        function setTheme(theme) {
+            let imagePath = {
+                sea: "sea.jpg",
+                space: "space.jpg",
+                nebula: "nebula.jpg",
+                default: "sea.jpg"
+            };
+
+            document.body.style.background = `url('${imagePath[theme]}') no-repeat center center fixed`;
+            document.body.style.backgroundSize = "cover";
+        }
+
+        function changePlate(type) {
+            let plateStyles = {
+                plate1: "brown",
+                plate2: "url('plate2.jpg')",
+                plate3: "gray"
+            };
+
+            basket.style.background = plateStyles[type];
+            basket.style.backgroundSize = "cover";
+        }
+        function createBubble() {
+        let bubble = document.createElement("div");
+        bubble.classList.add("bubble");
+        document.body.appendChild(bubble);
+
+        let size = Math.random() * 30 + 10; // Random size (10px to 40px)
+        bubble.style.width = size + "px";
+        bubble.style.height = size + "px";
+
+        bubble.style.left = Math.random() * window.innerWidth + "px"; // Random position
+
+        bubble.style.animationDuration = (Math.random() * 3 + 2) + "s"; // Random speed (2s to 5s)
+
+        setTimeout(() => {
+            bubble.remove(); // Remove bubble after animation
+        }, 5000);
+    }
+
+    setInterval(createBubble, 300); 
+    </script>
+</body>
+</html>
