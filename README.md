@@ -40,10 +40,10 @@ Each basket design is crafted to match different player preferences, allowing fo
 - ***Leaderboard Integration***: Future versions may include a leaderboard to compare scores with friends.
 
 ## 📸 Screenshots
-_(Add screenshots here)_
+
 
 ## 🎥 Gameplay Video
-_(Add a gameplay video here)_
+
 
 ## 🚀 Installation & Running the Game
 1. Download or clone this repository.
