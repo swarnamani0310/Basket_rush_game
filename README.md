@@ -40,11 +40,14 @@ Each basket design is crafted to match different player preferences, allowing fo
 - ***Leaderboard Integration***: Future versions may include a leaderboard to compare scores with friends.
 
 ## 📸 Screenshots
+![Image](https://github.com/user-attachments/assets/8768f91d-7de0-4426-8b6b-7ac54c77cf23)
 
+![Image](https://github.com/user-attachments/assets/efb39c9b-85ca-4c38-b5ae-0e470effbf51)
+
+![Image](https://github.com/user-attachments/assets/f4ed4f8d-66cf-4590-9fca-852770652489)
 
 ## 🎥 Gameplay Video
-
-
+https://github.com/user-attachments/assets/dc086146-62f1-430d-9ca8-52b0b72e4393
 ## 🚀 Installation & Running the Game
 1. Download or clone this repository.
    https://github.com/swarnamani0310/Basket_rush_game.git
