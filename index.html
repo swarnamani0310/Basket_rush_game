@@ -3,260 +3,781 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catch the Falling Objects</title>
+    <title>Futura Fashion - Women's & Children's Clothing</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
     <style>
-        body {
+        * {
             margin: 0;
-            overflow: hidden;
-            background: url('sea.jpg') no-repeat center center fixed;
-            background-size: cover;
-            font-family: Arial, sans-serif;
-            transition: background 0.5s ease-in-out;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .bubble {
-        position: absolute;
-        bottom: -50px; /* Start below the screen */
-        width: 20px;
-        height: 20px;
-        background: rgba(255, 255, 255, 0.5);
-        border-radius: 50%;
-        opacity: 0.7;
-        animation: rise 5s linear infinite;
-    }
 
-    @keyframes rise {
-        0% {
-            transform: translateY(0);
-            opacity: 1;
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0f0f0f;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8b8;
+            --neon-blue: #00d4ff;
+            --neon-pink: #ff0080;
+            --neon-purple: #8b5cf6;
         }
-        100% {
-            transform: translateY(-100vh);
-            opacity: 0;
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
         }
-    }
-        #gameContainer {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(45deg, #0a0a0a, #1a1a2e, #16213e);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
         }
-        #gameTitle {
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating particles */
+        .particle {
             position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 32px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        .basket {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            width: 100px;
-            height: 60px;
-            background: brown;
-            border-radius: 10px;
-            transform: translateX(-50%);
-            background-size: cover;
-        }
-        .object {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background: red;
+            background: var(--neon-blue);
             border-radius: 50%;
+            pointer-events: none;
+            animation: float 6s ease-in-out infinite;
         }
-        #score, #timer, #missed {
-            position: absolute;
-            top: 10px;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
         }
-        #score { left: 10px; }
-        #timer { right: 10px; }
-        #missed { right: 150px; }
-        #gameOver {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 40px;
-            font-weight: bold;
-            color: red;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
+
+        /* Glass morphism effect */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
         }
-        
-        /* Updated buttons position */
-        .buttons-container {
-            position: absolute;
-            top: 60px;
-            left: 10px;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        button {
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 20px;
-            background: linear-gradient(45deg, #ff7e5f, #feb47b);
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            z-index: 1000;
             transition: all 0.3s ease;
-            width: 150px;
         }
-        button:hover {
-            background: linear-gradient(45deg, #feb47b, #ff7e5f);
+
+        .navbar.scrolled {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-gradient);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .cart-icon {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .cart-icon:hover {
+            color: var(--neon-pink);
+            transform: scale(1.1);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--secondary-gradient);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            z-index: 2;
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 5px var(--neon-blue)); }
+            to { filter: drop-shadow(0 0 20px var(--neon-blue)); }
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: var(--secondary-gradient);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(245, 87, 108, 0.5);
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        /* Section Styling */
+        .section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section h2 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .product-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 212, 255, 0.2);
+            border-color: var(--neon-blue);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            background: var(--primary-gradient);
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .product-card:hover .product-image::before {
+            transform: translateX(100%);
+        }
+
+        .product-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--neon-pink);
+            margin-bottom: 1rem;
+        }
+
+        .add-to-cart {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .add-to-cart:hover {
             transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.4);
+        }
+
+        /* Categories */
+        .categories {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 1rem 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .category-btn.active,
+        .category-btn:hover {
+            background: var(--primary-gradient);
+            border-color: var(--neon-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            padding: 3rem 2rem 1rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--neon-blue);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--neon-pink);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.2);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .mobile-nav {
+                display: block;
+                color: var(--text-primary);
+                font-size: 1.5rem;
+                cursor: pointer;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+            
+            .section h2 {
+                font-size: 2rem;
+            }
+            
+            .categories {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                padding: 1rem;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-gradient);
         }
     </style>
 </head>
 <body>
-    <div id="gameTitle">Basket Rush</div>
-    <div id="gameContainer">
-        <div id="score">Score: 0</div>
-        <div id="timer">Time: 60</div>
-        <div id="missed">Missed: 0</div>
-        <div class="basket" id="basket"></div>
-        <div id="gameOver">Game Over! Refresh to Restart</div>
-    </div>
+    <div class="bg-animation"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">Futura Fashion</a>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#women">Women</a></li>
+                <li><a href="#children">Children</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <div class="cart-icon" id="cartIcon">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+            <div class="mobile-nav">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
 
-    <div class="buttons-container">
-        <button onclick="setTheme('sea')">🌊 Sea Theme</button>
-        <button onclick="setTheme('space')">🚀 Space Theme</button>
-        <button onclick="setTheme('nebula')">✨ Nebula Theme</button>
-        <button onclick="setTheme('default')">🎮 Default Theme</button>
-        <hr>
-        <button onclick="changePlate('plate1')">🍽 Plate 1</button>
-        <button onclick="changePlate('plate2')">🍽 Plate 2</button>
-        <button onclick="changePlate('plate3')">🍽 Plate 3</button>
-    </div>
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Future of Fashion</h1>
+            <p>Discover cutting-edge designs for women and children that blend style with innovation</p>
+            <a href="#women" class="cta-button">Explore Collection</a>
+        </div>
+    </section>
+
+    <!-- Women's Section -->
+    <section class="section" id="women">
+        <h2>Women's Collection</h2>
+        <div class="categories">
+            <button class="category-btn active" onclick="filterProducts('all', 'women')">All</button>
+            <button class="category-btn" onclick="filterProducts('dresses', 'women')">Dresses</button>
+            <button class="category-btn" onclick="filterProducts('tops', 'women')">Tops</button>
+            <button class="category-btn" onclick="filterProducts('bottoms', 'women')">Bottoms</button>
+            <button class="category-btn" onclick="filterProducts('accessories', 'women')">Accessories</button>
+        </div>
+        <div class="product-grid" id="womenProducts">
+            <!-- Products will be dynamically loaded -->
+        </div>
+    </section>
+
+    <!-- Children's Section -->
+    <section class="section" id="children">
+        <h2>Children's Collection</h2>
+        <div class="categories">
+            <button class="category-btn active" onclick="filterProducts('all', 'children')">All</button>
+            <button class="category-btn" onclick="filterProducts('girls', 'children')">Girls</button>
+            <button class="category-btn" onclick="filterProducts('boys', 'children')">Boys</button>
+            <button class="category-btn" onclick="filterProducts('baby', 'children')">Baby</button>
+            <button class="category-btn" onclick="filterProducts('accessories', 'children')">Accessories</button>
+        </div>
+        <div class="product-grid" id="childrenProducts">
+            <!-- Products will be dynamically loaded -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>About Futura Fashion</h3>
+                <p>Leading the way in futuristic fashion for women and children. Quality, innovation, and style combined.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-pinterest"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <p><a href="#home">Home</a></p>
+                <p><a href="#women">Women's Collection</a></p>
+                <p><a href="#children">Children's Collection</a></p>
+                <p><a href="#about">About Us</a></p>
+            </div>
+            <div class="footer-section">
+                <h3>Customer Service</h3>
+                <p><a href="#">Size Guide</a></p>
+                <p><a href="#">Shipping Info</a></p>
+                <p><a href="#">Returns</a></p>
+                <p><a href="#">FAQ</a></p>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Info</h3>
+                <p>Email: info@futurafashion.com</p>
+                <p>Phone: +1 (555) 123-4567</p>
+                <p>Address: 123 Fashion Ave, Style City, SC 12345</p>
+            </div>
+        </div>
+        <div style="border-top: 1px solid var(--glass-border); padding-top: 1rem; margin-top: 2rem; color: var(--text-secondary);">
+            <p>&copy; 2024 Futura Fashion. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script>
-        const basket = document.getElementById("basket");
-        let score = 0;
-        let missed = 0;
-        let gameOver = false;
-        let timeLeft = 60;
+        // Sample product data
+        const products = {
+            women: [
+                { id: 1, name: "Quantum Dress", price: "$299", category: "dresses", icon: "👗" },
+                { id: 2, name: "Neon Blazer", price: "$199", category: "tops", icon: "🧥" },
+                { id: 3, name: "Holographic Skirt", price: "$149", category: "bottoms", icon: "👗" },
+                { id: 4, name: "Future Heels", price: "$249", category: "accessories", icon: "👠" },
+                { id: 5, name: "Digital Print Top", price: "$89", category: "tops", icon: "👕" },
+                { id: 6, name: "Cyber Pants", price: "$179", category: "bottoms", icon: "👖" },
+                { id: 7, name: "LED Handbag", price: "$199", category: "accessories", icon: "👜" },
+                { id: 8, name: "Metallic Dress", price: "$349", category: "dresses", icon: "✨" }
+            ],
+            children: [
+                { id: 9, name: "Rainbow Dress", price: "$79", category: "girls", icon: "🌈" },
+                { id: 10, name: "Space Suit", price: "$99", category: "boys", icon: "🚀" },
+                { id: 11, name: "Glow Sneakers", price: "$69", category: "accessories", icon: "👟" },
+                { id: 12, name: "Baby Onesie", price: "$39", category: "baby", icon: "👶" },
+                { id: 13, name: "Princess Cape", price: "$59", category: "girls", icon: "👸" },
+                { id: 14, name: "Robot T-Shirt", price: "$29", category: "boys", icon: "🤖" },
+                { id: 15, name: "Smart Watch", price: "$149", category: "accessories", icon: "⌚" },
+                { id: 16, name: "Unicorn Hoodie", price: "$89", category: "girls", icon: "🦄" }
+            ]
+        };
 
-        document.addEventListener("mousemove", (event) => {
-            if (!gameOver) {
-                let x = event.clientX;
-                basket.style.left = x + "px";
-            }
+        let cart = [];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts('women', 'all');
+            loadProducts('children', 'all');
+            createFloatingParticles();
+            setupScrollEffects();
         });
 
-        function createObject() {
-            if (gameOver) return;
-            const object = document.createElement("div");
-            object.classList.add("object");
-            object.style.left = Math.random() * window.innerWidth + "px";
-            object.style.top = "0px";
-            document.getElementById("gameContainer").appendChild(object);
+        // Load products into the grid
+        function loadProducts(section, category) {
+            const container = document.getElementById(section + 'Products');
+            const sectionProducts = products[section];
+            
+            let filteredProducts = category === 'all' 
+                ? sectionProducts 
+                : sectionProducts.filter(p => p.category === category);
 
-            let fallInterval = setInterval(() => {
-                if (gameOver) {
-                    clearInterval(fallInterval);
-                    return;
-                }
-                object.style.top = object.offsetTop + 5 + "px";
-
-                const basketLeft = basket.offsetLeft;
-                const basketRight = basketLeft + 100;
-                const objectLeft = object.offsetLeft;
-                const objectRight = objectLeft + 30;
-
-                if (object.offsetTop > window.innerHeight - 70) {
-                    if (objectRight > basketLeft && objectLeft < basketRight) {
-                        score++;
-                        document.getElementById("score").innerText = "Score: " + score;
-                    } else {
-                        missed++;
-                        document.getElementById("missed").innerText = "Missed: " + missed;
-                        if (missed >= 3) {
-                            endGame();
-                        }
-                    }
-                    document.getElementById("gameContainer").removeChild(object);
-                    clearInterval(fallInterval);
-                }
-            }, 30);
+            container.innerHTML = filteredProducts.map(product => `
+                <div class="product-card">
+                    <div class="product-image">
+                        <span style="font-size: 4rem;">${product.icon}</span>
+                    </div>
+                    <h3 class="product-title">${product.name}</h3>
+                    <p class="product-price">${product.price}</p>
+                    <button class="add-to-cart" onclick="addToCart(${product.id}, '${product.name}', '${product.price}')">
+                        Add to Cart
+                    </button>
+                </div>
+            `).join('');
         }
 
-        function startTimer() {
-            let timerInterval = setInterval(() => {
-                if (gameOver) {
-                    clearInterval(timerInterval);
-                    return;
-                }
-                timeLeft--;
-                document.getElementById("timer").innerText = "Time: " + timeLeft;
-                if (timeLeft <= 0) {
-                    endGame();
-                }
+        // Filter products by category
+        function filterProducts(category, section) {
+            // Update active button
+            const buttons = document.querySelectorAll(`#${section} .category-btn`);
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Load filtered products
+            loadProducts(section, category);
+        }
+
+        // Add product to cart
+        function addToCart(id, name, price) {
+            cart.push({ id, name, price });
+            updateCartCount();
+            
+            // Add visual feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Added!';
+            button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = '';
             }, 1000);
         }
 
-        function endGame() {
-            document.getElementById("gameOver").style.display = "block";
-            gameOver = true;
+        // Update cart count
+        function updateCartCount() {
+            document.getElementById('cartCount').textContent = cart.length;
         }
 
-        setInterval(createObject, 1000);
-        startTimer();
-
-        function setTheme(theme) {
-            let imagePath = {
-                sea: "sea.jpg",
-                space: "space.jpg",
-                nebula: "nebula.jpg",
-                default: "sea.jpg"
-            };
-
-            document.body.style.background = `url('${imagePath[theme]}') no-repeat center center fixed`;
-            document.body.style.backgroundSize = "cover";
+        // Create floating particles
+        function createFloatingParticles() {
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = Math.random() * 100 + 'vw';
+                    particle.style.top = Math.random() * 100 + 'vh';
+                    particle.style.width = particle.style.height = Math.random() * 4 + 2 + 'px';
+                    particle.style.animationDelay = Math.random() * 6 + 's';
+                    particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                    
+                    document.body.appendChild(particle);
+                    
+                    // Remove particle after animation
+                    setTimeout(() => {
+                        if (particle.parentNode) {
+                            particle.parentNode.removeChild(particle);
+                        }
+                    }, 6000);
+                }, i * 300);
+            }
+            
+            // Recreate particles periodically
+            setTimeout(createFloatingParticles, 10000);
         }
 
-        function changePlate(type) {
-            let plateStyles = {
-                plate1: "brown",
-                plate2: "url('plate2.jpg')",
-                plate3: "gray"
-            };
-
-            basket.style.background = plateStyles[type];
-            basket.style.backgroundSize = "cover";
+        // Setup scroll effects
+        function setupScrollEffects() {
+            const navbar = document.getElementById('navbar');
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 100) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
         }
-        function createBubble() {
-        let bubble = document.createElement("div");
-        bubble.classList.add("bubble");
-        document.body.appendChild(bubble);
 
-        let size = Math.random() * 30 + 10; // Random size (10px to 40px)
-        bubble.style.width = size + "px";
-        bubble.style.height = size + "px";
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
 
-        bubble.style.left = Math.random() * window.innerWidth + "px"; // Random position
-
-        bubble.style.animationDuration = (Math.random() * 3 + 2) + "s"; // Random speed (2s to 5s)
-
-        setTimeout(() => {
-            bubble.remove(); // Remove bubble after animation
-        }, 5000);
-    }
-
-    setInterval(createBubble, 300); 
+        // Cart icon click handler
+        document.getElementById('cartIcon').addEventListener('click', function() {
+            if (cart.length === 0) {
+                alert('Your cart is empty! Add some futuristic fashion items.');
+            } else {
+                const cartItems = cart.map(item => `${item.name} - ${item.price}`).join('\n');
+                alert(`Cart Items:\n${cartItems}\n\nTotal Items: ${cart.length}`);
+            }
+        });
     </script>
 </body>
 </html>
